@@ -1,5 +1,5 @@
 import { createRoot } from "react-dom/client";
-import Grid from "./Grid";
+import Grid from "./Components/Grid";
 
 const App = () => (
   <div>

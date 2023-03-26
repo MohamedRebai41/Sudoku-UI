@@ -1,6 +1,6 @@
 .grid {
   height: 472px;
-  width: 469.5px;
+  width: 474px;
   display: flex;
   flex-direction: column;
   border: 3px solid black;
@@ -21,7 +21,13 @@
 
 .case:focus {
   caret-color: transparent;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
+
+
 
 .case:disabled {
   background-color: #e0e0e0;
@@ -35,4 +41,8 @@
 
 .edge-row {
   border-bottom: 3px solid black;
+}
+
+.case.wrong {
+  background-color: #f26161;
 }

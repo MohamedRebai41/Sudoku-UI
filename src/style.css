@@ -1,0 +1,38 @@
+.grid {
+  height: 472px;
+  width: 469.5px;
+  display: flex;
+  flex-direction: column;
+  border: 3px solid black;
+  border-right: none;
+  border-bottom: none;
+  border-collapse: collapse;
+}
+
+.case {
+  height: 50px;
+  width: 50px;
+  border: 1px solid gray;
+  border-collapse: collapse;
+  font-size: 30px;
+  text-align: center;
+  padding: 0px;
+}
+
+.case:focus {
+  caret-color: transparent;
+}
+
+.case:disabled {
+  background-color: #e0e0e0;
+  color: black;
+  font-weight: bold;
+}
+
+.edge-case {
+  border-right: 3px solid black;
+}
+
+.edge-row {
+  border-bottom: 3px solid black;
+}

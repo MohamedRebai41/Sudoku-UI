@@ -1,9 +1,27 @@
-import { useState } from "react";
+import { forwardRef, useState } from "react";
 
-const Case = (props) => {
+const Case = forwardRef(function Case(props, ref) {
   const [value, setValue] = useState("");
+  const handleKeyDown = (event) => {
+    // Handle arrow key presses
+    if (event.keyCode === 37) {
+      // Left arrow key
+      props.handleArrowKey("left", props.row * 9 + props.col);
+    } else if (event.keyCode === 38) {
+      // Up arrow key
+      props.handleArrowKey("up", props.row * 9 + props.col);
+    } else if (event.keyCode === 39) {
+      // Right arrow key
+      props.handleArrowKey("right", props.row * 9 + props.col);
+    } else if (event.keyCode === 40) {
+      // Down arrow key
+      props.handleArrowKey("down", props.row * 9 + props.col);
+    }
+  };
+
   return (
     <input
+      ref={ref}
       className={`case ${props.isEdge ? "edge-case" : ""}`}
       type="text"
       onFocus={(e) => {
@@ -27,8 +45,9 @@ const Case = (props) => {
           setValue(inputVal == 0 ? "" : inputVal);
         }
       }}
+      onKeyDown={handleKeyDown}
     />
   );
-};
+});
 
 export default Case;

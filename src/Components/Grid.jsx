@@ -1,8 +1,8 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import checkValid from "../Functions/checkValid";
 import Row from "./Row";
 
-const Grid = () => {
+const Grid = (props) => {
   const initialGrid = [
     [9, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 1, 0, 0],
@@ -22,6 +22,22 @@ const Grid = () => {
   }
 
   const [grid, setGrid] = useState(initialGrid);
+  const [lastGrid, setLastGrid] = useState(initialGrid);
+  useEffect(
+    () => {
+      setGrid(initialGrid);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [props.clear]
+  );
+
+  useEffect(
+    () => {
+      setGrid(lastGrid);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [props.undo]
+  );
 
   const handleArrowKey = (direction, index) => {
     let nextIndex = index;
@@ -40,14 +56,18 @@ const Grid = () => {
   };
 
   function handleCaseChange(row, col, value) {
-    const newGrid = [...grid];
-    newGrid[row][col] = value;
+    const newGrid = JSON.parse(JSON.stringify(grid));
+    newGrid[row][col] = +value;
+    setLastGrid(grid);
     setGrid(newGrid);
-    return checkValid(row, col, value, newGrid);
+  }
+
+  function checkValidCaseChange(row, col, value) {
+    return checkValid(row, col, value, grid);
   }
   return (
     <div className="grid">
-      {initialGrid.map((row, index) => (
+      {grid.map((row, index) => (
         <Row
           key={index}
           row={row}
@@ -56,6 +76,7 @@ const Grid = () => {
           isEdge={index % 3 == 2}
           index={index}
           handleArrowKey={handleArrowKey}
+          checkValid={checkValidCaseChange}
         ></Row>
       ))}
     </div>

@@ -1,17 +1,19 @@
 import { createRoot } from "react-dom/client";
-import Grid from "./Components/Grid";
+import Puzzle from "./Components/Puzzle";
 
-const App = () => (
-  <div className="app-container">
-    <div className="bar">
-      <img src="./assets/logo.svg" alt="logo" />
-      <span> Sudoku </span>
+const App = () => {
+  return (
+    <div className="app-container">
+      <div className="bar">
+        <img src="./assets/logo.svg" alt="logo" />
+        <span> Sudoku </span>
+      </div>
+      <div className="content-container">
+        <Puzzle />
+      </div>
     </div>
-    <div className="content-container">
-      <Grid />
-    </div>
-  </div>
-);
+  );
+};
 
 const container = document.getElementById("root");
 const root = createRoot(container);

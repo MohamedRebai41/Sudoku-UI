@@ -1,7 +1,23 @@
-import { forwardRef, useState } from "react";
+import { forwardRef, useEffect, useState } from "react";
 
 const Case = forwardRef(function Case(props, ref) {
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState(props.value);
+  const [isInitial, setIsInitial] = useState(false);
+  const [isValid, setIsValid] = useState(true);
+  useEffect(() => {
+    if (props.value != 0) {
+      setValue(props.value);
+      setIsInitial(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    setValue(props.value);
+    setIsValid(props.checkValid(props.row, props.col, props.value));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [props.value]);
+
   const handleKeyDown = (event) => {
     // Handle arrow key presses
     if (event.keyCode === 37) {
@@ -22,7 +38,9 @@ const Case = forwardRef(function Case(props, ref) {
   return (
     <input
       ref={ref}
-      className={`case ${props.isEdge ? "edge-case" : ""}`}
+      className={`case ${props.isEdge ? "edge-case" : ""} ${
+        !isValid ? "invalid" : ""
+      }`}
       type="text"
       onFocus={(e) => {
         e.target.setSelectionRange(
@@ -30,19 +48,14 @@ const Case = forwardRef(function Case(props, ref) {
           e.target.value.length
         );
       }}
-      disabled={props.value != 0}
-      value={props.value != 0 ? props.value : value}
+      disabled={isInitial}
+      value={value == 0 ? "" : value}
       onChange={(e) => {
         let inputVal = e.target.value;
         if (inputVal.length == 2) inputVal = inputVal[1];
         else if (inputVal.length == 0) inputVal = 0;
         if (/[0-9]/.test(inputVal)) {
-          if (!props.handleCaseChange(props.row, props.col, +inputVal)) {
-            e.target.classList.add("wrong");
-          } else {
-            e.target.classList.remove("wrong");
-          }
-          setValue(inputVal == 0 ? "" : inputVal);
+          props.handleCaseChange(props.row, props.col, inputVal);
         }
       }}
       onKeyDown={handleKeyDown}

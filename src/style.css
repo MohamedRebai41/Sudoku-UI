@@ -72,10 +72,14 @@ body {
   background-color: rgba(128, 128, 128, 0.514);
 }
 
-.case:disabled {
+.case.initial {
   background-color: #000000;
   color: white;
   font-weight: bold;
+}
+
+.case.initial:focus {
+  background-color: rgb(15, 15, 15);
 }
 
 .edge-case {

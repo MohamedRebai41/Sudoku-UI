@@ -5,8 +5,8 @@ import { useState } from "react";
 import checkValid from "../Functions/checkValid";
 const Puzzle = () => {
   const initialGrid = [
-    [9, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 1, 0, 0],
+    [0, 1, 0, 0, 0, 0, 0, 0, 0],
+    [9, 0, 0, 0, 0, 0, 1, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 7, 0, 0],
     [0, 0, 4, 0, 0, 0, 0, 0, 8],

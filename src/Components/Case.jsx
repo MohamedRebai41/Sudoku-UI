@@ -40,7 +40,7 @@ const Case = forwardRef(function Case(props, ref) {
       ref={ref}
       className={`case ${props.isEdge ? "edge-case" : ""} ${
         !isValid ? "invalid" : ""
-      }`}
+      } ${isInitial ? "initial" : ""}`}
       type="text"
       onFocus={(e) => {
         e.target.setSelectionRange(
@@ -48,14 +48,16 @@ const Case = forwardRef(function Case(props, ref) {
           e.target.value.length
         );
       }}
-      disabled={isInitial}
+      // disabled={isInitial}
       value={value == 0 ? "" : value}
       onChange={(e) => {
-        let inputVal = e.target.value;
-        if (inputVal.length == 2) inputVal = inputVal[1];
-        else if (inputVal.length == 0) inputVal = 0;
-        if (/[0-9]/.test(inputVal)) {
-          props.handleCaseChange(props.row, props.col, inputVal);
+        if (!isInitial) {
+          let inputVal = e.target.value;
+          if (inputVal.length == 2) inputVal = inputVal[1];
+          else if (inputVal.length == 0) inputVal = 0;
+          if (/[0-9]/.test(inputVal)) {
+            props.handleCaseChange(props.row, props.col, inputVal);
+          }
         }
       }}
       onKeyDown={handleKeyDown}

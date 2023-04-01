@@ -1,26 +1,56 @@
-import { forwardRef, useEffect, useState } from "react";
+/* eslint-disable react-hooks/exhaustive-deps */
+import { forwardRef, useContext, useEffect, useState } from "react";
+import checkValid from "../Functions/checkValid";
+import { currentGrid, solutionGrid } from "./Puzzle";
 
 const Case = forwardRef(function Case(props, ref) {
   const [value, setValue] = useState(props.value);
   const [isInitial, setIsInitial] = useState(false);
   const [isValid, setIsValid] = useState(true);
+  const [checkState, setCheckState] = useState("unchecked");
+
+  const current = useContext(currentGrid);
+  const solution = useContext(solutionGrid);
+
   useEffect(() => {
-    if (props.value != 0) {
-      setValue(props.value);
+    if (current[props.row][props.col] != 0) {
+      setValue(current[props.row][props.col]);
       setIsInitial(true);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    setValue(props.value);
-    setIsValid(props.checkValid(props.row, props.col, props.value));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.value]);
+    setValue(current[props.row][props.col]);
+    setIsValid(checkValid(props.row, props.col, props.value, current));
+  }, [current]);
+
+  useEffect(() => {
+    if (props.checkMode) {
+      if (current[props.row][props.col] != solution[props.row][props.col]) {
+        setCheckState("wrong");
+      } else if (!isInitial) {
+        setCheckState("right");
+      }
+    } else {
+      setCheckState("unchecked");
+    }
+  }, [props.checkMode, current]);
 
   const handleKeyDown = (event) => {
+    // Handle digit key presses
+    if (/[1-9]/.test(event.key)) {
+      if (!isInitial) {
+        props.handleCaseChange(props.row, props.col, event.key);
+      }
+    }
+    //Handle backspace key press
+    else if (event.keyCode === 8) {
+      if (!isInitial) {
+        props.handleCaseChange(props.row, props.col, 0);
+      }
+    }
     // Handle arrow key presses
-    if (event.keyCode === 37) {
+    else if (event.keyCode === 37) {
       // Left arrow key
       props.handleArrowKey("left", props.row * 9 + props.col);
     } else if (event.keyCode === 38) {
@@ -39,8 +69,8 @@ const Case = forwardRef(function Case(props, ref) {
     <input
       ref={ref}
       className={`case ${props.isEdge ? "edge-case" : ""} ${
-        !isValid ? "invalid" : ""
-      } ${isInitial ? "initial" : ""}`}
+        !isValid && !isInitial ? "invalid" : ""
+      } ${isInitial ? "initial" : ""} ${checkState}`}
       type="text"
       onFocus={(e) => {
         e.target.setSelectionRange(
@@ -48,18 +78,7 @@ const Case = forwardRef(function Case(props, ref) {
           e.target.value.length
         );
       }}
-      // disabled={isInitial}
       value={value == 0 ? "" : value}
-      onChange={(e) => {
-        if (!isInitial) {
-          let inputVal = e.target.value;
-          if (inputVal.length == 2) inputVal = inputVal[1];
-          else if (inputVal.length == 0) inputVal = 0;
-          if (/[0-9]/.test(inputVal)) {
-            props.handleCaseChange(props.row, props.col, inputVal);
-          }
-        }
-      }}
       onKeyDown={handleKeyDown}
     />
   );

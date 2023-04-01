@@ -35,7 +35,7 @@ const Grid = (props) => {
           isEdge={index % 3 == 2}
           index={index}
           handleArrowKey={handleArrowKey}
-          checkValid={props.checkValidCaseChange}
+          checkMode={props.checkMode}
         ></Row>
       ))}
     </div>

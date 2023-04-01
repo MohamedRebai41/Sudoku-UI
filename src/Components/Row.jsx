@@ -12,10 +12,10 @@ const Row = forwardRef(function Row(props, ref) {
           col={index}
           value={value}
           handleCaseChange={props.handleCaseChange}
-          checkValid={props.checkValid}
           isEdge={index % 3 == 2}
           handleArrowKey={props.handleArrowKey}
-        ></Case>
+          checkMode={props.checkMode}
+        />
       ))}
     </div>
   );

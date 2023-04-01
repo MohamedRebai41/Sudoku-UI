@@ -1,24 +1,43 @@
 import Grid from "./Grid";
 import { FaUndo } from "react-icons/fa";
 import { AiOutlineClear } from "react-icons/ai";
-import { useState } from "react";
-import checkValid from "../Functions/checkValid";
+import { useState, React, createContext } from "react";
+
+const solutionGrid = createContext();
+const currentGrid = createContext();
+export { solutionGrid, currentGrid };
+
 const Puzzle = () => {
-  const initialGrid = [
-    [0, 1, 0, 0, 0, 0, 0, 0, 0],
-    [9, 0, 0, 0, 0, 0, 1, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 7, 0, 0],
-    [0, 0, 4, 0, 0, 0, 0, 0, 8],
-    [0, 0, 0, 0, 0, 5, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 7, 0, 0, 6, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 9],
+  const solution = [
+    [7, 3, 1, 8, 5, 9, 6, 4, 2],
+    [4, 8, 2, 6, 7, 3, 1, 9, 5],
+    [5, 6, 9, 4, 1, 2, 7, 8, 3],
+    [2, 4, 5, 9, 3, 1, 8, 6, 7],
+    [1, 7, 8, 5, 6, 4, 2, 3, 9],
+    [6, 9, 3, 2, 8, 7, 5, 1, 4],
+    [8, 1, 4, 3, 2, 5, 9, 7, 6],
+    [3, 5, 6, 7, 9, 8, 4, 2, 1],
+    [9, 2, 7, 1, 4, 6, 3, 5, 8],
   ];
+
+  const initialGrid = [
+    [7, 3, 1, 8, 0, 0, 6, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 5],
+    [5, 6, 0, 0, 0, 2, 7, 0, 0],
+    [2, 0, 5, 0, 3, 0, 8, 6, 7],
+    [1, 7, 8, 0, 6, 0, 0, 3, 0],
+    [0, 0, 0, 2, 0, 0, 0, 0, 0],
+    [0, 1, 4, 3, 0, 5, 0, 0, 0],
+    [3, 0, 6, 0, 0, 0, 0, 2, 0],
+    [0, 0, 0, 1, 0, 0, 0, 5, 0],
+  ];
+
   const undoLimit = 10;
+
   const [grid, setGrid] = useState(initialGrid);
   const [gridHistory, setGridHistory] = useState([]);
-  const [undoLimited, setUndoLimited] = useState(false);
+  const [undoLimited, setUndoLimited] = useState(gridHistory.length == 0);
+  const [checkMode, setCheckMode] = useState(false);
 
   function handleCaseChange(row, col, value) {
     const newGrid = JSON.parse(JSON.stringify(grid));
@@ -33,10 +52,6 @@ const Puzzle = () => {
     }
     setGridHistory(newGridHistory);
     setGrid(newGrid);
-  }
-
-  function checkValidCaseChange(row, col, value) {
-    return checkValid(row, col, value, grid);
   }
 
   return (
@@ -65,11 +80,31 @@ const Puzzle = () => {
           <AiOutlineClear className="clear-icon" />
         </button>
       </div>
-      <Grid
-        grid={grid}
-        handleCaseChange={handleCaseChange}
-        checkValidCaseChange={checkValidCaseChange}
-      />
+      <currentGrid.Provider value={grid}>
+        <solutionGrid.Provider value={solution}>
+          <Grid
+            grid={grid}
+            handleCaseChange={handleCaseChange}
+            checkMode={checkMode}
+          />
+        </solutionGrid.Provider>
+      </currentGrid.Provider>
+      <div className="bottom-bar">
+        <button
+          className="solve"
+          onClick={() => {
+            setGrid(solution);
+          }}
+        >
+          Solve
+        </button>
+        <button
+          className={`check ${checkMode ? "on" : ""}`}
+          onClick={() => setCheckMode(!checkMode)}
+        >
+          Check: {checkMode ? "on" : "off"}
+        </button>
+      </div>
     </div>
   );
 };

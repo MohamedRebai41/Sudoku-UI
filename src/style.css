@@ -4,12 +4,31 @@ body {
   font-family: "Roboto", sans-serif;
 }
 
+@media (max-width: 480px) {
+  #puzzle-small {
+    height: 300px;
+    width: 300px;
+  }
+  .case {
+    font-size: 20px !important;
+  }
+  .solve,
+  .check {
+    font-size: 18px !important;
+  }
+}
+
 .content-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   margin-top: 20px;
+}
+
+.puzzle-container {
+  height: 400px;
+  width: 400px;
 }
 
 .bar {
@@ -38,9 +57,9 @@ body {
 }
 
 .grid {
-  height: 472px;
-  width: auto;
-  display: flex;
+  height: 100%;
+  width: 100%;
+  display: inline-flex;
   flex-direction: column;
   border: 3px solid white;
   border-right: none;
@@ -49,13 +68,20 @@ body {
   background-color: #1d1d1d;
 }
 
+.row {
+  height: calc(100% / 9); /* set height to 1/9th of the grid height */
+  width: 100%; /* set width to 100% of parent container */
+  display: flex;
+  flex-direction: row;
+}
+
 .case {
   cursor: pointer;
-  height: 50px;
-  width: 50px;
+  height: 100%;
+  width: calc(100% / 9);
   border: 1px solid gray;
   border-collapse: collapse;
-  font-size: 30px;
+  font-size: 23px;
   text-align: center;
   padding: 0px;
   background-color: #1d1d1d;
@@ -88,6 +114,7 @@ body {
 
 .edge-row {
   border-bottom: 3px solid white;
+  width: auto;
 }
 
 .case.invalid {
@@ -136,11 +163,12 @@ body {
 .puzzle-bar {
   display: flex;
   justify-content: flex-end;
+  width: 100%;
 }
 
 .solve {
   margin: 10px;
-  width: 200px;
+  width: 40%;
   height: 40px;
   background-color: #1a0225;
   border: none;
@@ -159,7 +187,7 @@ body {
 
 .check {
   margin: 10px;
-  width: 200px;
+  width: 40%;
   height: 40px;
   background-color: black;
   border: none;

@@ -55,7 +55,7 @@ const Puzzle = () => {
   }
 
   return (
-    <div>
+    <div className="puzzle-container" id="puzzle-small">
       <div className="puzzle-bar">
         <button
           className="undo button"

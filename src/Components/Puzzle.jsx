@@ -105,6 +105,9 @@ const Puzzle = () => {
           Check: {checkMode ? "on" : "off"}
         </button>
       </div>
+      <div className="help">
+        <span>Press Enter to toggle candidate mode</span>
+      </div>
     </div>
   );
 };

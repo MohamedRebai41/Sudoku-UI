@@ -24,6 +24,9 @@ const Grid = (props) => {
     }
   };
 
+  const refocus = (index) => {
+    caseRefs.current[index].current.focus();
+  };
   return (
     <div className="grid">
       {props.grid.map((row, index) => (
@@ -36,6 +39,7 @@ const Grid = (props) => {
           index={index}
           handleArrowKey={handleArrowKey}
           checkMode={props.checkMode}
+          refocus={refocus}
         ></Row>
       ))}
     </div>

@@ -15,6 +15,7 @@ const Row = forwardRef(function Row(props, ref) {
           isEdge={index % 3 == 2}
           handleArrowKey={props.handleArrowKey}
           checkMode={props.checkMode}
+          refocus={props.refocus}
         />
       ))}
     </div>

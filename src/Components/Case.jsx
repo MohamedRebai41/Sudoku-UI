@@ -2,13 +2,15 @@
 import { forwardRef, useContext, useEffect, useState } from "react";
 import checkValid from "../Functions/checkValid";
 import { currentGrid, solutionGrid } from "./Puzzle";
+import calculateCandidateString from "../Functions/calculateCandidateString";
 
 const Case = forwardRef(function Case(props, ref) {
   const [value, setValue] = useState(props.value);
   const [isInitial, setIsInitial] = useState(false);
   const [isValid, setIsValid] = useState(true);
   const [checkState, setCheckState] = useState("unchecked");
-
+  const [candidateMode, setCandidateMode] = useState(false);
+  const [candidates, setCandidates] = useState(Array(9).fill(false));
   const current = useContext(currentGrid);
   const solution = useContext(solutionGrid);
 
@@ -36,11 +38,21 @@ const Case = forwardRef(function Case(props, ref) {
     }
   }, [props.checkMode, current]);
 
+  useEffect(() => {
+    ref.current.focus();
+  }, [candidateMode]);
+
   const handleKeyDown = (event) => {
     // Handle digit key presses
     if (/[1-9]/.test(event.key)) {
       if (!isInitial) {
-        props.handleCaseChange(props.row, props.col, event.key);
+        if (!candidateMode) {
+          props.handleCaseChange(props.row, props.col, event.key);
+        } else {
+          candidates[+event.key - 1] = !candidates[+event.key - 1];
+          setCandidates([...candidates]);
+          console.log(calculateCandidateString(candidates));
+        }
       }
     }
     //Handle backspace key press
@@ -63,25 +75,44 @@ const Case = forwardRef(function Case(props, ref) {
       // Down arrow key
       props.handleArrowKey("down", props.row * 9 + props.col);
     }
+    //enter key
+    else if (event.keyCode === 13) {
+      if (!isInitial) {
+        setCandidateMode(!candidateMode);
+      }
+    }
   };
 
-  return (
-    <input
-      ref={ref}
-      className={`case ${props.isEdge ? "edge-case" : ""} ${
-        !isValid && !isInitial ? "invalid" : ""
-      } ${isInitial ? "initial" : ""} ${checkState}`}
-      type="text"
-      onFocus={(e) => {
-        e.target.setSelectionRange(
-          e.target.value.length,
-          e.target.value.length
-        );
-      }}
-      value={value == 0 ? "" : value}
-      onKeyDown={handleKeyDown}
-    />
-  );
+  if (candidateMode) {
+    return (
+      // eslint-disable-next-line jsx-a11y/no-static-element-interactions
+      <textarea
+        className={`case candidate ${props.isEdge ? "edge-case" : ""}`}
+        onKeyDown={handleKeyDown}
+        ref={ref}
+        value={calculateCandidateString(candidates)}
+      ></textarea>
+    );
+  } else {
+    return (
+      <input
+        readOnly
+        ref={ref}
+        className={`case ${props.isEdge ? "edge-case" : ""} ${
+          !isValid && !isInitial ? "invalid" : ""
+        } ${isInitial ? "initial" : ""} ${checkState}`}
+        type="text"
+        onFocus={(e) => {
+          e.target.setSelectionRange(
+            e.target.value.length,
+            e.target.value.length
+          );
+        }}
+        value={value == 0 ? "" : value}
+        onKeyDown={handleKeyDown}
+      />
+    );
+  }
 });
 
 export default Case;

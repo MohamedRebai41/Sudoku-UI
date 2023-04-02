@@ -16,6 +16,9 @@ body {
   .check {
     font-size: 18px !important;
   }
+  .case.candidate {
+    font-size: 9px !important;
+  }
 }
 
 .content-container {
@@ -69,10 +72,16 @@ body {
 }
 
 .row {
-  height: calc(100% / 9); /* set height to 1/9th of the grid height */
-  width: 100%; /* set width to 100% of parent container */
+  height: calc(100% / 9);
+  width: 100%;
   display: flex;
   flex-direction: row;
+}
+
+.case.candidate {
+  font-size: 12px;
+  resize: none;
+  overflow: hidden;
 }
 
 .case {
@@ -86,6 +95,7 @@ body {
   padding: 0px;
   background-color: #1d1d1d;
   color: white;
+  transition: all 0.3s ease-in-out;
 }
 
 .case:focus {
@@ -208,4 +218,11 @@ body {
 
 .check.on {
   background-color: #00ff00 !important;
+}
+
+.help {
+  width: 100%;
+  margin-top: 10px;
+
+  text-align: center;
 }

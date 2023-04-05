@@ -8,6 +8,7 @@ const Grid = (props) => {
     caseRefs.current[i] = useRef(null);
   }
 
+  //handle focusing navigating the grid with arrow keys. The Ref is used to expose dom elements (the inputs) to the parent component
   const handleArrowKey = (direction, index) => {
     let nextIndex = index;
     if (direction === "left") {
@@ -27,6 +28,7 @@ const Grid = (props) => {
   const refocus = (index) => {
     caseRefs.current[index].current.focus();
   };
+
   return (
     <div className="grid">
       {props.grid.map((row, index) => (
@@ -35,6 +37,8 @@ const Grid = (props) => {
           row={row}
           ref={caseRefs}
           handleCaseChange={props.handleCaseChange}
+          handleCandidateChange={props.handleCandidateChange}
+          toggleCandidateMode={props.toggleCandidateMode}
           isEdge={index % 3 == 2}
           index={index}
           handleArrowKey={handleArrowKey}

@@ -1,49 +1,50 @@
 import Grid from "./Grid";
 import { FaUndo } from "react-icons/fa";
 import { AiOutlineClear } from "react-icons/ai";
-import { useState, React, createContext } from "react";
+import { useState, React, useEffect } from "react";
+import constructPuzzleState from "../Functions/constructPuzzleState";
+import constructSolutionState from "../Functions/constructSolutionstate";
+import checkValidity from "../Functions/checkValidity";
 
-const solutionGrid = createContext();
-const currentGrid = createContext();
-export { solutionGrid, currentGrid };
+//This component is the main component of the app. It contains the state of the whole puzzle, passes it down to the other components, and saves the puzzle states in an array to allow the user to undo steps
+const undoLimit = 30;
 
 const Puzzle = () => {
-  const solution = [
-    [7, 3, 1, 8, 5, 9, 6, 4, 2],
-    [4, 8, 2, 6, 7, 3, 1, 9, 5],
-    [5, 6, 9, 4, 1, 2, 7, 8, 3],
-    [2, 4, 5, 9, 3, 1, 8, 6, 7],
-    [1, 7, 8, 5, 6, 4, 2, 3, 9],
-    [6, 9, 3, 2, 8, 7, 5, 1, 4],
-    [8, 1, 4, 3, 2, 5, 9, 7, 6],
-    [3, 5, 6, 7, 9, 8, 4, 2, 1],
-    [9, 2, 7, 1, 4, 6, 3, 5, 8],
-  ];
-
-  const initialGrid = [
-    [7, 3, 1, 8, 0, 0, 6, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 5],
-    [5, 6, 0, 0, 0, 2, 7, 0, 0],
-    [2, 0, 5, 0, 3, 0, 8, 6, 7],
-    [1, 7, 8, 0, 6, 0, 0, 3, 0],
-    [0, 0, 0, 2, 0, 0, 0, 0, 0],
-    [0, 1, 4, 3, 0, 5, 0, 0, 0],
-    [3, 0, 6, 0, 0, 0, 0, 2, 0],
-    [0, 0, 0, 1, 0, 0, 0, 5, 0],
-  ];
-
-  const undoLimit = 10;
-
-  const [grid, setGrid] = useState(initialGrid);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [initialState, setInitialState] = useState([]);
+  const [solutionState, setSolutionState] = useState([]);
+  const [grid, setGrid] = useState([]);
   const [gridHistory, setGridHistory] = useState([]);
+
   const [undoLimited, setUndoLimited] = useState(gridHistory.length == 0);
   const [checkMode, setCheckMode] = useState(false);
 
-  function handleCaseChange(row, col, value) {
-    const newGrid = JSON.parse(JSON.stringify(grid));
-    newGrid[row][col] = +value;
+  async function getNewPuzzle() {
+    setIsLoaded(false);
+    const result = await fetch("https://sudoku-api.vercel.app/api/dosuku");
+    const data = await result.json();
+    if (data) {
+      const newInitialState = constructPuzzleState(
+        data.newboard.grids[0].value,
+        data.newboard.grids[0].solution
+      );
+      const newSolutionState = constructSolutionState(newInitialState);
+      setInitialState(newInitialState);
+      setSolutionState(newSolutionState);
+      setGrid(newInitialState);
+      setGridHistory([]);
+      setUndoLimited(true);
+      setIsLoaded(true);
+    }
+  }
+
+  useEffect(() => {
+    getNewPuzzle();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  function setNewGridHistory(last) {
     const newGridHistory = gridHistory;
-    newGridHistory.push(grid);
+    newGridHistory.push(last);
     if (newGridHistory.length > undoLimit) {
       newGridHistory.shift();
     }
@@ -51,49 +52,90 @@ const Puzzle = () => {
       setUndoLimited(false);
     }
     setGridHistory(newGridHistory);
-    setGrid(newGrid);
   }
 
+  function toggleCandidateMode(row, col) {
+    const newGrid = JSON.parse(JSON.stringify(grid));
+    newGrid[row][col].candidateMode = !newGrid[row][col].candidateMode;
+    newGrid[row][col].candidates = Array(9).fill(false);
+    newGrid[row][col].value = "";
+    checkValidity(newGrid);
+    setNewGridHistory(grid);
+    setGrid(newGrid);
+  }
+  function handleCandidateChange(row, col, value) {
+    const newGrid = JSON.parse(JSON.stringify(grid));
+    newGrid[row][col].candidates[+value - 1] =
+      !newGrid[row][col].candidates[+value - 1];
+    setNewGridHistory(grid);
+    setGrid(newGrid);
+  }
+  function handleCaseChange(row, col, value) {
+    const newGrid = JSON.parse(JSON.stringify(grid));
+    newGrid[row][col].value = value == 0 ? "" : +value;
+    checkValidity(newGrid);
+    setNewGridHistory(grid);
+    setGrid(newGrid);
+  }
+  if (!isLoaded) {
+    return (
+      <div className="center">
+        <div className="lds-ring">
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="puzzle-container" id="puzzle-small">
       <div className="puzzle-bar">
-        <button
-          className="undo button"
-          disabled={undoLimited}
-          onClick={() => {
-            if (gridHistory.length > 0) {
-              setGrid(gridHistory.pop());
-            }
-            if (gridHistory.length == 0) {
-              setUndoLimited(true);
-            }
-          }}
-        >
-          <FaUndo className="undo-icon" />
+        <button className="new-game" onClick={getNewPuzzle}>
+          New Game
         </button>
-        <button
-          className="clear button"
-          onClick={() => {
-            setGrid(initialGrid);
-          }}
-        >
-          <AiOutlineClear className="clear-icon" />
-        </button>
+        <div>
+          <button
+            className="undo button"
+            disabled={undoLimited}
+            onClick={() => {
+              if (gridHistory.length > 0) {
+                setGrid(gridHistory.pop());
+              }
+              if (gridHistory.length == 0) {
+                setUndoLimited(true);
+              }
+            }}
+          >
+            <FaUndo className="undo-icon" />
+          </button>
+          <button
+            className="clear button"
+            onClick={() => {
+              setNewGridHistory(grid);
+              setGrid(initialState);
+            }}
+          >
+            <AiOutlineClear className="clear-icon" />
+          </button>
+        </div>
       </div>
-      <currentGrid.Provider value={grid}>
-        <solutionGrid.Provider value={solution}>
-          <Grid
-            grid={grid}
-            handleCaseChange={handleCaseChange}
-            checkMode={checkMode}
-          />
-        </solutionGrid.Provider>
-      </currentGrid.Provider>
+
+      <Grid
+        grid={grid}
+        handleCaseChange={handleCaseChange}
+        handleCandidateChange={handleCandidateChange}
+        toggleCandidateMode={toggleCandidateMode}
+        checkMode={checkMode}
+      />
+
       <div className="bottom-bar">
         <button
           className="solve"
           onClick={() => {
-            setGrid(solution);
+            setNewGridHistory(grid);
+            setGrid(solutionState);
           }}
         >
           Solve

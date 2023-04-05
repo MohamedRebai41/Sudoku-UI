@@ -1,67 +1,49 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { forwardRef, useContext, useEffect, useState } from "react";
-import checkValid from "../Functions/checkValid";
-import { currentGrid, solutionGrid } from "./Puzzle";
+import { forwardRef, useEffect, useState } from "react";
 import calculateCandidateString from "../Functions/calculateCandidateString";
 
 const Case = forwardRef(function Case(props, ref) {
-  const [value, setValue] = useState(props.value);
-  const [isInitial, setIsInitial] = useState(false);
-  const [isValid, setIsValid] = useState(true);
   const [checkState, setCheckState] = useState("unchecked");
-  const [candidateMode, setCandidateMode] = useState(false);
-  const [candidates, setCandidates] = useState(Array(9).fill(false));
-  const current = useContext(currentGrid);
-  const solution = useContext(solutionGrid);
-
+  //this effect is used to detect when the user is in check mode and if the case is wrong or right
   useEffect(() => {
-    if (current[props.row][props.col] != 0) {
-      setValue(current[props.row][props.col]);
-      setIsInitial(true);
-    }
-  }, []);
-
-  useEffect(() => {
-    setValue(current[props.row][props.col]);
-    setIsValid(checkValid(props.row, props.col, props.value, current));
-  }, [current]);
-
-  useEffect(() => {
-    if (props.checkMode) {
-      if (current[props.row][props.col] != solution[props.row][props.col]) {
+    if (props.value && props.checkMode) {
+      if (props.value != props.solution) {
         setCheckState("wrong");
-      } else if (!isInitial) {
+      } else if (!props.isInitial) {
         setCheckState("right");
       }
     } else {
       setCheckState("unchecked");
     }
-  }, [props.checkMode, current]);
+  }, [props.checkMode, props.value, props.solution, props.isInitial]);
 
+  //this effect is used to refocus the element when the component rerenders (when the user toggles candidate mode)
   useEffect(() => {
     ref.current.focus();
-  }, [candidateMode]);
+  }, [props.candidateMode]);
 
   const handleKeyDown = (event) => {
-    // Handle digit key presses
+    // Handle digit key presses (in candidate mode, the digit is added to the candidate list, otherwise the value changes)
     if (/[1-9]/.test(event.key)) {
-      if (!isInitial) {
-        if (!candidateMode) {
-          props.handleCaseChange(props.row, props.col, event.key);
+      if (!props.isInitial) {
+        if (!props.candidateMode) {
+          props.handleCaseChange(
+            props.row,
+            props.col,
+            props.value == event.key ? 0 : event.key
+          );
         } else {
-          candidates[+event.key - 1] = !candidates[+event.key - 1];
-          setCandidates([...candidates]);
-          console.log(calculateCandidateString(candidates));
+          props.handleCandidateChange(props.row, props.col, event.key);
         }
       }
     }
     //Handle backspace key press
     else if (event.keyCode === 8) {
-      if (!isInitial) {
+      if (!props.isInitial) {
         props.handleCaseChange(props.row, props.col, 0);
       }
     }
-    // Handle arrow key presses
+    // Handle arrow key presses (for navigating the grid)
     else if (event.keyCode === 37) {
       // Left arrow key
       props.handleArrowKey("left", props.row * 9 + props.col);
@@ -75,22 +57,24 @@ const Case = forwardRef(function Case(props, ref) {
       // Down arrow key
       props.handleArrowKey("down", props.row * 9 + props.col);
     }
-    //enter key
+    //enter key toggles candidate mode
     else if (event.keyCode === 13) {
-      if (!isInitial) {
-        setCandidateMode(!candidateMode);
+      if (!props.isInitial) {
+        props.toggleCandidateMode(props.row, props.col);
       }
     }
   };
 
-  if (candidateMode) {
+  //conditional rendering of the input element. If the user is in candidate mode, a textarea is rendered instead
+  if (props.candidateMode) {
     return (
       // eslint-disable-next-line jsx-a11y/no-static-element-interactions
       <textarea
+        readOnly
         className={`case candidate ${props.isEdge ? "edge-case" : ""}`}
         onKeyDown={handleKeyDown}
         ref={ref}
-        value={calculateCandidateString(candidates)}
+        value={calculateCandidateString(props.candidates)}
       ></textarea>
     );
   } else {
@@ -99,8 +83,8 @@ const Case = forwardRef(function Case(props, ref) {
         readOnly
         ref={ref}
         className={`case ${props.isEdge ? "edge-case" : ""} ${
-          !isValid && !isInitial ? "invalid" : ""
-        } ${isInitial ? "initial" : ""} ${checkState}`}
+          !props.isValid ? "invalid" : ""
+        } ${props.isInitial ? "initial" : ""} ${checkState}`}
         type="text"
         onFocus={(e) => {
           e.target.setSelectionRange(
@@ -108,7 +92,7 @@ const Case = forwardRef(function Case(props, ref) {
             e.target.value.length
           );
         }}
-        value={value == 0 ? "" : value}
+        value={props.value}
         onKeyDown={handleKeyDown}
       />
     );

@@ -11,6 +11,7 @@ const undoLimit = 30;
 
 const Puzzle = () => {
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isError, setIsError] = useState(false);
   const [initialState, setInitialState] = useState([]);
   const [solutionState, setSolutionState] = useState([]);
   const [grid, setGrid] = useState([]);
@@ -21,9 +22,16 @@ const Puzzle = () => {
 
   async function getNewPuzzle() {
     setIsLoaded(false);
-    const result = await fetch("https://sudoku-api.vercel.app/api/dosuku");
-    const data = await result.json();
-    if (data) {
+    setIsError(false);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => {
+      controller.abort();
+    }, 3000);
+    try {
+      const result = await fetch("https://sudoku-api.vercel.app/api/dosuku", {
+        signal: controller.signal,
+      });
+      const data = await result.json();
       const newInitialState = constructPuzzleState(
         data.newboard.grids[0].value,
         data.newboard.grids[0].solution
@@ -35,6 +43,10 @@ const Puzzle = () => {
       setGridHistory([]);
       setUndoLimited(true);
       setIsLoaded(true);
+    } catch (err) {
+      setIsError(true);
+    } finally {
+      clearTimeout(timeout);
     }
   }
 
@@ -76,6 +88,17 @@ const Puzzle = () => {
     checkValidity(newGrid);
     setNewGridHistory(grid);
     setGrid(newGrid);
+  }
+
+  if (isError) {
+    return (
+      <div className="center">
+        <h1>Oops, something went wrong</h1>
+        <button className="new-game" onClick={getNewPuzzle}>
+          Try again
+        </button>
+      </div>
+    );
   }
   if (!isLoaded) {
     return (
